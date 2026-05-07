@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Analyzer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>YouTube Video Analyzer</h1>
+        <p>Analyze YouTube videos using NLP</p>
+
+        <div class="search-box">
+            <input
+                type="text"
+                id="videoUrl"
+                placeholder="Paste YouTube URL or Video ID..."
+            >
+            <button onclick="analyzeVideo()">Analyze</button>
+        </div>
+
+        <div id="loading" class="hidden">
+            <p>Analyzing video...</p>
+        </div>
+
+        <div id="error" class="error hidden"></div>
+
+        <div id="result" class="hidden">
+
+            <div class="video-card">
+                <img id="thumbnail" src="" alt="Thumbnail">
+                <div class="video-info">
+                    <h2 id="title"></h2>
+                    <p><strong>Channel:</strong> <span id="channel"></span></p>
+                    <p><strong>Published:</strong> <span id="published"></span></p>
+                    <p><strong>Views:</strong> <span id="views"></span></p>
+                    <p><strong>Likes:</strong> <span id="likes"></span></p>
+                    <p><strong>Comments:</strong> <span id="comments"></span></p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Keywords</h2>
+                <div id="keywords"></div>
+            </div>
+
+            <div class="section">
+                <h2>Summary</h2>
+                <p id="summary"></p>
+            </div>
+
+            <div class="section">
+                <h2>Sentiment Analysis</h2>
+                <p>Positive: <span id="positive"></span>%</p>
+                <p>Neutral: <span id="neutral"></span>%</p>
+                <p>Negative: <span id="negative"></span>%</p>
+            </div>
+
+            <div class="section">
+                <h2>Most Frequent Words</h2>
+                <ul id="wordFreq"></ul>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        async function analyzeVideo() {
+            const url = document.getElementById("videoUrl").value;
+
+            document.getElementById("loading").classList.remove("hidden");
+            document.getElementById("error").classList.add("hidden");
+            document.getElementById("result").classList.add("hidden");
+
+            const response = await fetch("/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url })
+            });
+
+            const data = await response.json();
+
+            document.getElementById("loading").classList.add("hidden");
+
+            if (data.error) {
+                const errorDiv = document.getElementById("error");
+                errorDiv.innerText = data.error;
+                errorDiv.classList.remove("hidden");
+                return;
+            }
+
+            document.getElementById("thumbnail").src = data.thumbnail;
+            document.getElementById("title").innerText = data.title;
+            document.getElementById("channel").innerText = data.channel;
+            document.getElementById("published").innerText = data.published_at;
+            document.getElementById("views").innerText = data.stats.views;
+            document.getElementById("likes").innerText = data.stats.likes;
+            document.getElementById("comments").innerText = data.stats.comments;
+
+            document.getElementById("summary").innerText =
+                data.nlp.summary || "No summary available";
+
+            document.getElementById("positive").innerText =
+                data.nlp.sentiment.percentages.positive;
+
+            document.getElementById("neutral").innerText =
+                data.nlp.sentiment.percentages.neutral;
+
+            document.getElementById("negative").innerText =
+                data.nlp.sentiment.percentages.negative;
+
+            const keywordsDiv = document.getElementById("keywords");
+            keywordsDiv.innerHTML = "";
+            data.nlp.keywords.forEach(word => {
+                keywordsDiv.innerHTML += `<span class="tag">${word}</span>`;
+            });
+
+            const wordFreq = document.getElementById("wordFreq");
+            wordFreq.innerHTML = "";
+            data.nlp.word_frequency.forEach(item => {
+                wordFreq.innerHTML += `<li>${item.word} (${item.count})</li>`;
+            });
+
+            document.getElementById("result").classList.remove("hidden");
+        }
+    </script>
+
+</body>
+</html>
