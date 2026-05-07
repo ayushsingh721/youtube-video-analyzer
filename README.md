@@ -1,2 +1,16 @@
-# youtube-video-analyzer
-Developed a YouTube Video Analyzer web application using Python, Flask, and YouTube Data API v3 that extracts video metadata and applies NLP techniques such as tokenization, stopword removal, keyword extraction, sentiment analysis, and text summarization to generate meaningful insights from video descriptions and comments.
+Description
+
+Built a YouTube Video Analyzer using Flask, YouTube Data API v3, and NLP to extract video metadata, perform keyword extraction, sentiment analysis, and automatic summarization.
+
+Features
+metadata extraction
+comment analysis
+keyword extraction
+sentiment detection
+summary generation
+Tech Stack
+Python
+Flask
+YouTube API
+NLTK
+HTML/CSS
